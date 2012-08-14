@@ -1,0 +1,5 @@
+# Analyze technical debt and velocity for Pivotal project
+# Author: Mark Lubarsky
+# Creation Date: 8/13/2012
+
+# USAGE: ruby pivotal_technical_debt_velocity_report.rb pivotal_csv_file.csv
