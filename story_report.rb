@@ -144,7 +144,11 @@ class StoryReport
         #{files_str}
       REPORT
 
-      report.story.notes.create(:text => str)
+      begin
+        report.story.notes.create(:text => str)
+      rescue RestClient::UnprocessableEntity => e
+        report.story.notes.create(:text => str.slice(0,20000))
+      end
     end
   end
 
