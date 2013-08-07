@@ -148,6 +148,7 @@ class StoryReport
         if (str.slice(0,20000) == report.comments.last)
           puts "WARNING:Story #{report.story.id} has not changed since the last report was made, skipping..."
         else
+          puts "Generating a report for Story #{report.story.url} '#{report.story.name}' (#{report.commits.count} commits, #{report.touched_files.count} affected files)."
           report.story.notes.create(:text => str)
         end
       rescue RestClient::UnprocessableEntity => e
@@ -177,9 +178,21 @@ class StoryReport
 
     label = ENV['STORY_FILTER']
 
+    state = ['finished','delivered']
+    story_type = ['feature', 'bug']
+
+    if label
+      story_type = ['chore', 'bug', 'feature']
+      state = ['started','finished','delivered']
+    end
+
     @@project ||= PivotalTracker::Project.find(PROJECT)
-    filters = { modified_since: (Time.now - 2*24*60*60).strftime('%d/%m/%Y'), current_state: ['started','finished','delivered'] }
+    filters = { modified_since: (Time.now - 2*24*60*60).strftime('%d/%m/%Y') }
+
     filters.merge!(label: label) if label
+    filters.merge!(current_state: state) if state
+    filters.merge!(story_type: story_type) if story_type
+
     @@stories ||= @@project.stories.all(filters)
     @@stories.map {|story| StoryReport.new(story: story)}
   end
