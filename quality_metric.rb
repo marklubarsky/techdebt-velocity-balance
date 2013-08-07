@@ -12,14 +12,14 @@ class QualityMetric
   CODE_REPO_DIR = {
       "viralheat/frontend" => "../../viralheat/frontend",
       "viralheat/backend" => "../../viralheat/backend",
-      "viralheat/reporting" => "../../viralheat/reporting",
+      "viralheat/reporter" => "../../viralheat/reporter",
       "viralheat/reports" => "../../viralheat/reports",
   }
 
   CI_CODE_REPO_DIR = {
       "viralheat/frontend" => "../../development/workspace",
       "viralheat/backend" => "../../backend/workspace",
-      "viralheat/reporting" => "../../reporting/workspace",
+      "viralheat/reporter" => "../../reporter/workspace",
       "viralheat/reports" => "../../reports/workspace",
   }
 
