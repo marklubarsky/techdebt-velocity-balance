@@ -39,7 +39,7 @@ class StoryReport
     end.compact.reject {|c| c.empty?}
   end
 
-  def report
+  def summary
     authors = commits.map {|commit| commit_author(commit) }.uniq
 
     report = {
@@ -107,7 +107,7 @@ class StoryReport
       commit_files(commit).flatten.compact.uniq.map do |file|
         file_details(commit[:repo], file)
       end
-    end.flatten
+    end.flatten.uniq
   end
 
   def scores
@@ -124,6 +124,31 @@ class StoryReport
     end
   end
 
+  def self.publish
+    StoryReport.recent.each do |report|
+      files = report.touched_files
+      files_str = files.map do |file|
+        metric_str = supported_metrics(:ruby).map do |metric_type|
+          metric = file[metric_type]
+          ((metric == 'missing') ? nil : "[#{metric_type}: #{metric[:score]}, LOC: #{metric[:lines]} - #{metric[:link]}]")
+        end.compact.join("|")
+        metric_str = metric_str.present? ? "(#{metric_str})" : ''
+        "#{file[:file]}#{metric_str}"
+      end.join("\n")
+
+      str = <<-REPORT
+        This story involved changes to #{files.count} files:
+        #{files_str}
+      REPORT
+
+      report.story.notes.create(:text => str)
+    end
+  end
+
+  def self.find(story_id)
+    recent.detect {|report| report.story.id == story_id }
+  end
+
   def self.supported_metrics(platform)
     if platform == :ruby
       [:coverage, :saikuro]
@@ -138,8 +163,12 @@ class StoryReport
       @@stories = nil
     end
 
+    label = ENV['STORY_FILTER']
+
     @@project ||= PivotalTracker::Project.find(PROJECT)
-    @@stories ||= @@project.stories.all(modified_since: (Time.now - 2*24*60*60).strftime('%d/%m/%Y'), current_state: ['finished','delivered'])
+    filters = { modified_since: (Time.now - 2*24*60*60).strftime('%d/%m/%Y'), current_state: ['started','finished','delivered'] }
+    filters.merge!(label: label) if label
+    @@stories ||= @@project.stories.all(filters)
     @@stories.map {|story| StoryReport.new(story: story)}
   end
 
