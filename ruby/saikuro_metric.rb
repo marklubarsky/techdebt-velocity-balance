@@ -8,7 +8,7 @@ module Ruby
     end
 
     def file_score_link(repo, _)
-      "#{ci_root(repo)}/metric_fu/output/saikuro.html"
+      "#{ci_root(repo)}/metrics/metric_fu/output/saikuro.html"
     end
 
     def file_code_lines(repo, file)

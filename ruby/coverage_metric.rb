@@ -6,7 +6,7 @@ module Ruby
     end
 
     def file_score_link(repo, file)
-      "#{ci_root(repo)}/#{file_entry(repo, file).first.parent.css('a').last.attr('href')}"
+      "#{ci_root(repo)}/metrics/coverage/rcov/#{file_entry(repo, file).first.parent.css('a').last.attr('href')}"
     end
 
     def file_code_lines(repo, file)
