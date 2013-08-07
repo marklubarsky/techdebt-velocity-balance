@@ -1,8 +1,8 @@
 load 'quality_metric.rb'
 module Ruby
   class CoverageMetric < QualityMetric
-    def file_score(entry)
-      entry.first.parent.parent.css('.percent_graph_legend').last.text
+    def file_score(repo, file)
+      file_entry(repo, file).first.parent.parent.css('.percent_graph_legend').last.text
     end
 
     def file_score_link(repo, file)
