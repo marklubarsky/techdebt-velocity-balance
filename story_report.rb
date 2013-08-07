@@ -145,8 +145,13 @@ class StoryReport
       REPORT
 
       begin
-        report.story.notes.create(:text => str)
+        if (str.slice(0,20000) == report.comments.last)
+          puts "WARNING:Story #{report.story.id} has not changed since the last report was made, skipping..."
+        else
+          report.story.notes.create(:text => str)
+        end
       rescue RestClient::UnprocessableEntity => e
+        puts "WARNING:Story #{report.story.id} has too many changes to fit in a comment (#{str.len} characters), truncating..."
         report.story.notes.create(:text => str.slice(0,20000))
       end
     end
