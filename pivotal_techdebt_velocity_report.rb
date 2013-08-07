@@ -7,11 +7,13 @@
 # USAGE: ruby pivotal_technical_debt_velocity_report.rb pivotal_csv_file.csv
 
 require 'rubygems'
-require 'fastercsv'
+#require 'fastercsv'
+require 'csv'
+require 'nokogiri'
 require 'ruby-debug'
 require 'active_support/core_ext'
 
-MONTHS = 12
+MONTHS = 1
 pivotal_csv_file = ARGV[0]
 
 def from_pivotal(file_path)
@@ -36,6 +38,7 @@ def summarize(attr_array, status_array)
    :no_point_features => attr_array.select { |row| row["Estimate"].to_i == 0}.count,
    :bugs => attr_array.select { |row| row["Story Type"] == "bug"}.count,
    :chores => attr_array.select { |row| row["Story Type"] == "chore"}.count,
+   :details => attr_array.map {|story| StoryReport.new(csv_hash: story).report}
   }
 end
 
@@ -43,11 +46,13 @@ def monthly_summary(attr_array, num_of_months=MONTHS)
   (1..num_of_months).inject([]) do |months, month|
     month = Time.now - (month - 1) * 1.month # go back N months
     summary = {:accepted => summarize(month_data(month, attr_array), ["accepted"])}.merge(:month => month.strftime("%B %Y"))
+    #require 'ruby-debug';debugger;
     summary.merge!(:outstanding => summarize(month_data(month, attr_array), ["delivered","finished","unstarted","started","rejected"]))
     months << summary
     months
   end
 end
+
 
 pivotal_attr_array = from_pivotal(pivotal_csv_file)
 summary = monthly_summary(pivotal_attr_array)
@@ -57,18 +62,18 @@ puts "Summary of #{pivotal_csv_file} for last #{MONTHS} months (as of #{Time.now
 
 summary.select{|s| s[:accepted][:stories].to_i > 0 || s[:outstanding][:stories].to_i > 0}.each do |month_summary|
   puts "=" * 30
+  puts "=" * 30
   puts "MONTH:#{month_summary[:month].inspect}"
   puts "TOTAL:#{month_summary[:accepted][:stories]} accepted stories, #{month_summary[:outstanding][:stories]} outstanding"
   puts "Point Features:#{month_summary[:accepted][:point_features]} accepted (#{month_summary[:accepted][:points]} points accepted), #{month_summary[:outstanding][:point_features]} outstanding (#{month_summary[:outstanding][:points]} points outstanding)"
   puts "0-point Features:#{month_summary[:accepted][:no_point_features]} accepted, #{month_summary[:outstanding][:no_point_features]} outstanding"
   puts "Bugs:#{month_summary[:accepted][:bugs]} accepted, #{month_summary[:outstanding][:bugs]} oustanding"
   puts "Chores:#{month_summary[:accepted][:chores]} accepted, #{month_summary[:outstanding][:chores]} oustanding"
+  puts "-" * 30
+  puts "DETAILS for Accepted stories:#{month_summary[:accepted][:details].to_yaml}"
+  puts "-" * 30
+  puts "DETAILS for Outstanding stories:#{month_summary[:outstanding][:details].to_yaml}"
+  puts "-" * 30
+  puts "=" * 30
   puts "=" * 30
 end
-
-
-
-
-
-
-
