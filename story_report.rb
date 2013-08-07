@@ -69,7 +69,7 @@ class StoryReport
     #return [] if commit.blank?
     repo, commit = commit[:repo], commit[:commit]
     cmd = "cd #{coverage.code_repo_dir(repo)}; git show --no-commit-id --name-only #{commit}"
-    puts cmd
+    puts "processing commit #{commit}, repo: #{repo}"
     `#{cmd}`.split("\n")
   end
 
