@@ -12,6 +12,13 @@ class QualityMetric
       "viralheat/reports" => "../../viralheat/reports",
   }
 
+  CI_CODE_REPO_DIR = {
+      "viralheat/frontend" => "../../development",
+      "viralheat/backend" => "../../backend",
+      "viralheat/reporting" => "../../reporting",
+      "viralheat/reports" => "../../reports",
+  }
+
 
   def initialize(story_report)
     @story_report = story_report
@@ -27,7 +34,8 @@ class QualityMetric
   end
 
   def code_repo_dir(repo = nil)
-    "#{current_dir}/#{CODE_REPO_DIR[repo]}"
+    relative = ENV['JOB'].present? ? CI_CODE_REPO_DIR[repo] : CODE_REPO_DIR[repo]
+    "#{current_dir}/#{relative}"
   end
 
   def metrics_supported?(repo)
