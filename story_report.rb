@@ -136,10 +136,11 @@ class StoryReport
         end.compact.join(",")
         metric_str = metric_str.present? ? "(#{metric_str})" : ''
         "#{file[:file]}#{metric_str}"
-      end.join("\n")
+      end.join("\n\n")
 
       str = <<-REPORT
         This story involved changes to #{files.count} files:
+
         #{files_str}
       REPORT
 
