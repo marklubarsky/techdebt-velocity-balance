@@ -48,7 +48,7 @@ class QualityMetric
   end
 
   def missing?(repo, file)
-    !(source(repo) && file_entry(repo, file).present?)
+    !(source(repo) && file_entries(repo, file).present?)
   end
 
   def current_dir
@@ -60,7 +60,7 @@ class QualityMetric
   end
 
   def self.class_for(metric_type)
-    "Ruby::#{metric_type.to_s.capitalize}Metric".constantize
+    "Ruby::#{metric_type.to_s.camelize}Metric".constantize
   end
 
 

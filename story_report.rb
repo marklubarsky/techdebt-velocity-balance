@@ -3,11 +3,21 @@ require 'active_support/core_ext'
 
 load 'ruby/coverage_metric.rb'
 load 'ruby/saikuro_metric.rb'
+load 'ruby/rails_best_practices_metric.rb'
 
 #p (load 'story_report.rb') && (reports=StoryReport.recent).last.report
 class StoryReport
 
-  attr_reader :csv_hash, :story, :coverage, :saikuro
+  def self.supported_metrics(platform)
+    if platform == :ruby
+      [:coverage, :saikuro, :rails_best_practices]
+    else
+      []
+    end
+  end
+
+  attr_reader :csv_hash, :story
+  attr_reader *StoryReport.supported_metrics(:ruby)
 
   API_TOKEN = 'c614d0c794183a6943f8034f32a7b32e'
   PivotalTracker::Client.token = API_TOKEN
@@ -19,8 +29,9 @@ class StoryReport
     @story = data[:story]
     @csv_hash = data[:csv]
     #require 'debugger';debugger
-    @coverage = Ruby::CoverageMetric.new(self)
-    @saikuro = Ruby::SaikuroMetric.new(self)
+    StoryReport.supported_metrics(:ruby).map do |metric_type|
+     instance_variable_set("@#{metric_type.to_s}", QualityMetric.class_for(metric_type).new(self))
+    end
   end
 
   def name
@@ -95,7 +106,7 @@ class StoryReport
                      {
                        score: metric.file_score(repo, file),
                        link: metric.file_score_link(repo, file),
-                       lines: metric.file_code_lines(repo, file)
+                       secondary_score: metric.file_secondary_score(repo, file)
                      }
       end
 
@@ -132,14 +143,14 @@ class StoryReport
       files_str = files.map do |file|
         metric_str = supported_metrics(:ruby).map do |metric_type|
           metric = file[metric_type]
-          ((metric == 'missing') ? nil : "#{metric_type.upcase}: [#{metric[:score]}(#{metric[:lines]} LOC) - #{metric[:link]} ]")
+          ((metric == 'missing') ? nil : "#{metric_type.upcase}: [#{metric[:score]}(#{metric[:secondary_score][:score]} #{metric[:secondary_score][:description]}) - #{metric[:link]} ]")
         end.compact.join(",")
         metric_str = metric_str.present? ? "(#{metric_str})" : ''
-        "#{file[:file]}#{metric_str}"
+        "#{file[:file]}:#{metric_str}"
       end.join("\n\n")
 
       str = <<-REPORT
-        This story involved changes to #{files.count} files:
+        This story involved changes to #{files.count} files via #{report.commits.count} commits:
 
         #{files_str}
       REPORT
@@ -160,14 +171,6 @@ class StoryReport
 
   def self.find(story_id)
     recent.detect {|report| report.story.id == story_id }
-  end
-
-  def self.supported_metrics(platform)
-    if platform == :ruby
-      [:coverage, :saikuro]
-    else
-      []
-    end
   end
 
   def self.recent(reload=false)
