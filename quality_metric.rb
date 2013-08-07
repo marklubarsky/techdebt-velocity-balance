@@ -5,6 +5,10 @@ class QualityMetric
       "viralheat/frontend" => "../../viralheat/frontend/metrics"
   }
 
+  CI_METRICS_DIR = {
+      "viralheat/frontend" => "../../#{ENV['JOB']}/workspace/metrics"
+  }
+
   CODE_REPO_DIR = {
       "viralheat/frontend" => "../../viralheat/frontend",
       "viralheat/backend" => "../../viralheat/backend",
@@ -13,10 +17,10 @@ class QualityMetric
   }
 
   CI_CODE_REPO_DIR = {
-      "viralheat/frontend" => "../../development",
-      "viralheat/backend" => "../../backend",
-      "viralheat/reporting" => "../../reporting",
-      "viralheat/reports" => "../../reports",
+      "viralheat/frontend" => "../../development/workspace",
+      "viralheat/backend" => "../../backend/workspace",
+      "viralheat/reporting" => "../../reporting/workspace",
+      "viralheat/reports" => "../../reports/workspace",
   }
 
 
@@ -30,7 +34,8 @@ class QualityMetric
   end
 
   def metrics_dir(repo)
-    "#{current_dir}/#{METRICS_DIR[repo]}"
+    relative = ENV['JOB'].present? ? CI_METRICS_DIR[repo] : METRICS_DIR[repo]
+    "#{current_dir}/#{relative}"
   end
 
   def code_repo_dir(repo = nil)
