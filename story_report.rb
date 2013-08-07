@@ -132,7 +132,7 @@ class StoryReport
       files_str = files.map do |file|
         metric_str = supported_metrics(:ruby).map do |metric_type|
           metric = file[metric_type]
-          ((metric == 'missing') ? nil : "#{metric_type.upcase}: [#{metric[:score]}/#{metric[:lines]} LOC - #{metric[:link]} ]")
+          ((metric == 'missing') ? nil : "#{metric_type.upcase}: [#{metric[:score]}(#{metric[:lines]} LOC) - #{metric[:link]} ]")
         end.compact.join(",")
         metric_str = metric_str.present? ? "(#{metric_str})" : ''
         "#{file[:file]}#{metric_str}"
