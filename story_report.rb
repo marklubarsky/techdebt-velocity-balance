@@ -163,7 +163,7 @@ class StoryReport
           report.story.notes.create(:text => str)
         end
       rescue RestClient::UnprocessableEntity => e
-        puts "WARNING:Story #{report.story.id} has too many changes to fit in a comment (#{str.len} characters), truncating..."
+        puts "WARNING:Story #{report.story.id} has too many changes to fit in a comment (#{str.length} characters), truncating..."
         report.story.notes.create(:text => str.slice(0,20000))
       end
     end
