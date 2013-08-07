@@ -68,7 +68,9 @@ class StoryReport
     #--pretty="format:"
     #return [] if commit.blank?
     repo, commit = commit[:repo], commit[:commit]
-    `cd #{coverage.code_repo_dir(repo)}; git show --no-commit-id --name-only #{commit}`.split("\n")
+    cmd = "cd #{coverage.code_repo_dir(repo)}; git show --no-commit-id --name-only #{commit}"
+    puts cmd
+    `#{cmd}`.split("\n")
   end
 
   def commit_files(commit)
