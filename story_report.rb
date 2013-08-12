@@ -47,7 +47,7 @@ class StoryReport
       csv_hash.entries.select {|field| field[0] == "Comment"}.map { |comment| comment[1]}
     else
       story.notes.all.map(&:text)
-    end.compact.reject {|c| c.empty?}
+    end.compact.reject {|c| c.empty? || (c !~ /github/) }
   end
 
   def summary
@@ -159,8 +159,12 @@ class StoryReport
         if (str.slice(0,20000) == report.comments.last)
           puts "WARNING:Story #{report.story.id} has not changed since the last report was made, skipping..."
         else
-          puts "Generating a report for Story #{report.story.url} '#{report.story.name}' (#{report.commits.count} commits, #{report.touched_files.count} affected files)."
-          report.story.notes.create(:text => str)
+          if dry_run?
+            puts "DRY RUN: Generating a report for Story #{report.story.url} '#{report.story.name}' (#{report.commits.count} commits, #{report.touched_files.count} affected files). REPORT: #{str}"
+          else
+            puts "Generating a report for Story #{report.story.url} '#{report.story.name}' (#{report.commits.count} commits, #{report.touched_files.count} affected files)."
+            report.story.notes.create(:text => str)
+          end
         end
       rescue RestClient::UnprocessableEntity => e
         puts "WARNING:Story #{report.story.id} has too many changes to fit in a comment (#{str.length} characters), truncating..."
@@ -203,6 +207,10 @@ class StoryReport
   private
   def csv_format?
     story.nil?
+  end
+
+  def dry_run?
+    ENV['DRY'].present?
   end
 
   def metric_instance(metric_type)
