@@ -14,6 +14,7 @@ class QualityMetric
       "viralheat/backend" => "../../viralheat/backend",
       "viralheat/reporter" => "../../viralheat/reporter",
       "viralheat/reports" => "../../viralheat/reports",
+      "viralheat/automated-qa" => "../../viralheat/automated-qa",
   }
 
   CI_CODE_REPO_DIR = {
@@ -21,6 +22,7 @@ class QualityMetric
       "viralheat/backend" => "../../backend/workspace",
       "viralheat/reporter" => "../../reporter/workspace",
       "viralheat/reports" => "../../reports/workspace",
+      "viralheat/automated-qa" => "../../automated-qa/workspace",
   }
 
 

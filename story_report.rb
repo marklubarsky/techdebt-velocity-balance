@@ -84,6 +84,13 @@ class StoryReport
     `#{cmd}`.split("\n")
   end
 
+  def commit_file_log(commit, file)
+    repo, commit = commit[:repo], commit[:commit]
+    cmd = "cd #{coverage.code_repo_dir(repo)}; git show #{commit} -- #{file}"
+    puts "processing detailed log for commit #{commit}, repo: #{repo}, file: #{file}"
+    { file: file, log: `#{cmd}` }
+  end
+
   def commit_files(commit)
     commit_details(commit)[0...-5]
   end
@@ -123,6 +130,20 @@ class StoryReport
     end.flatten.uniq
   end
 
+  def qa_tests
+    commits.map do |commit|
+      commit_files(commit).flatten.compact.uniq.reject do |file|
+        file !~ /\.feature$/
+      end.map do |file|
+        commit_file_log(commit, file)
+      end.select do |file_log|
+        file_log[:log].include?(name) || file_log[:log].include?(self.story.id.to_s)
+      end.map do |file_log|
+        commit.merge(url: "https://github.com/#{commit[:repo]}/blob/master/#{file_log[:file]}")
+      end
+    end.flatten.uniq.map
+  end
+
   def scores
     StoryReport.supported_metrics(:ruby).map do |metric_type|
       {
@@ -149,11 +170,21 @@ class StoryReport
         "#{file[:file]}:#{metric_str}"
       end.join("\n\n")
 
-      str = <<-REPORT
-        This story involved changes to #{files.count} files via #{report.commits.count} commits:
+      str = if report.qa_tests.present?
+              <<-REPORT
+
+        This story has QA tests #{report.qa_tests.map{|qa_test| qa_test[:url]}.uniq.join(' , ')} and involved changes to #{files.count} files via #{report.commits.count} commits:
 
         #{files_str}
-      REPORT
+              REPORT
+            else
+              <<-REPORT
+
+        This story does not have QA tests! It involved changes to #{files.count} files via #{report.commits.count} commits:
+
+        #{files_str}
+              REPORT
+            end
 
       begin
         if (str.slice(0,20000) == report.comments.last)
@@ -171,6 +202,10 @@ class StoryReport
         report.story.notes.create(:text => str.slice(0,20000))
       end
     end
+  end
+
+  def tested?
+    self.touched_files
   end
 
   def self.find(story_id)
@@ -194,7 +229,8 @@ class StoryReport
     end
 
     @@project ||= PivotalTracker::Project.find(PROJECT)
-    filters = { modified_since: (Time.now - 2*24*60*60).strftime('%d/%m/%Y') }
+
+    filters = { modified_since: (Time.now - 2*24*60*60).strftime('%m/%d/%Y') }
 
     filters.merge!(label: label) if label
     filters.merge!(current_state: state) if state
@@ -209,7 +245,7 @@ class StoryReport
     story.nil?
   end
 
-  def dry_run?
+  def self.dry_run?
     ENV['DRY'].present?
   end
 
