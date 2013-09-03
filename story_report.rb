@@ -170,10 +170,13 @@ class StoryReport
         "#{file[:file]}:#{metric_str}"
       end.join("\n\n")
 
-      str = if report.qa_tests.present?
+      qa_test_urls = report.qa_tests.map{|qa_test| qa_test[:url]}.uniq
+
+
+      str = if qa_test_urls.present?
               <<-REPORT
 
-        This story has QA tests #{report.qa_tests.map{|qa_test| qa_test[:url]}.uniq.join(' , ')} and involved changes to #{files.count} files via #{report.commits.count} commits:
+        This story has QA tests #{qa_test_urls.join(' , ')} and involved changes to #{files.count} files via #{report.commits.count} commits:
 
         #{files_str}
               REPORT
