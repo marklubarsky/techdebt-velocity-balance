@@ -50,6 +50,10 @@ class StoryReport
     end.compact.reject {|c| c.empty? || (c !~ /github/) }
   end
 
+  def prior_reports
+    story.notes.all.map(&:text).compact.reject {|c| c.empty? || (c !~ /This Story/i) }
+  end
+
   def summary
     authors = commits.map {|commit| commit_author(commit) }.uniq
 
@@ -190,7 +194,7 @@ class StoryReport
             end
 
       begin
-        if (str.slice(0,20000) == report.comments.last)
+        if (str.slice(0,20000) == report.prior_reports.last)
           puts "WARNING:Story #{report.story.id} has not changed since the last report was made, skipping..."
         else
           if dry_run?
