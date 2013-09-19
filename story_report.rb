@@ -143,7 +143,7 @@ class StoryReport
       end.select do |file_log|
         file_log[:log].include?(name) || file_log[:log].include?(self.story.id.to_s)
       end.map do |file_log|
-        commit.merge(url: "https://github.com/#{commit[:repo]}/blob/master/#{file_log[:file]}")
+        commit.merge(url: "https://github.com/#{commit[:repo]}/blob/development/#{file_log[:file]}")
       end
     end.flatten.uniq.map
   end
