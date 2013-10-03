@@ -19,7 +19,7 @@ class StoryReport
   attr_reader :csv_hash, :story
   attr_reader *StoryReport.supported_metrics(:ruby)
 
-  API_TOKEN = 'c614d0c794183a6943f8034f32a7b32e'
+  API_TOKEN = '342ae61d7ec4474abd530a59b7848b19'
   PivotalTracker::Client.token = API_TOKEN
 
   PROJECT = 528259
@@ -138,7 +138,7 @@ class StoryReport
     commits.map do |commit|
       commit_files(commit).flatten.compact.uniq.reject do |file|
         file !~ /\.feature$/
-      end.map do |file|
+      end.map do |file|z
         commit_file_log(commit, file)
       end.select do |file_log|
         file_log[:log].include?(name) || file_log[:log].include?(self.story.id.to_s)
