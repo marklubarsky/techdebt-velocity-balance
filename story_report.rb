@@ -138,7 +138,7 @@ class StoryReport
     commits.map do |commit|
       commit_files(commit).flatten.compact.uniq.reject do |file|
         file !~ /\.feature$/
-      end.map do |file|z
+      end.map do |file|
         commit_file_log(commit, file)
       end.select do |file_log|
         file_log[:log].include?(name) || file_log[:log].include?(self.story.id.to_s)
