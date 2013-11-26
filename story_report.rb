@@ -22,7 +22,7 @@ class StoryReport
   API_TOKEN = '342ae61d7ec4474abd530a59b7848b19'
   PivotalTracker::Client.token = API_TOKEN
 
-  PROJECT = 528259
+  PROJECT = 964598
 
 
   def initialize(data)
