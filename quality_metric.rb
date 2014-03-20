@@ -24,7 +24,7 @@ class QualityMetric
       "viralheat/reporter" => "../../reporter/workspace",
       "viralheat/reports" => "../../reports/workspace",
       "viralheat/automated-qa" => "../../automated-qa/workspace",
-      "viralheat/no-rails-server" => "../../no-rails-server/workspace",
+      "viralheat/no-rails-server" => "../../api-server/workspace",
   }
 
 
@@ -60,9 +60,13 @@ class QualityMetric
   end
 
   def ci_root(repo)
-    ENV['JOB'].present? ? "http://192.168.10.8:8080/job/#{ENV['JOB']}/ws" : current_dir
+    ENV['JOB'].present? ? "#{ci_url}/job/#{ENV['JOB']}/ws" : current_dir
   end
 
+
+  def ci_url
+    ENV['JENKINS_URL'].present?  ? ENV['JENKINS_URL'] : "ci-server.viralheat.com"
+  end
   def self.class_for(metric_type)
     "Ruby::#{metric_type.to_s.camelize}Metric".constantize
   end
